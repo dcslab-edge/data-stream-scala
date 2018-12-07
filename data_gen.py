@@ -20,13 +20,12 @@ class saveable_dir(argparse.Action):
             raise argparse.ArgumentTypeError("readable_dir:{0} is not a readable dir".format(prospective_dir))
 
 class dataType:
-    def __init__(self,data_name:string,data_type:string,data_count:int,data_length:int=100):
-        self._data_name=data_name
+    def __init__(self,data_type:string,data_count:int,data_length:int=100):
         self._data_type=data_type
         self._data_count=data_count
         self._data_length=data_length
-    def __str__(self):
-        return '{'+self._data_name+'}['+self._data_type+']('+str(self._data_length)+')'
+    # def __str__(self):
+    #     return "{"+self._data_name+"}["+self._data_type+"]("+str(self._data_length)+")"
 
 
 
@@ -37,12 +36,18 @@ class dataGenerator:
     def __init__(self,data_cfg={}):
         self._data_types=[]
         self._data_count = data_cfg["maximum_data_count"]
-        major_length = data_cfg["major_data_type"]
-        major_type = data_cfg["major_data_length"]
-        specific_len=len(data_cfg["specific_data_types"])
+        major_length = data_cfg["major_data_length"]
+        major_type = data_cfg["major_data_type"]
+        specific_len=0
         for d in data_cfg["specific_data_types"] :
             self._data_types.append(dataType(d["type"],d["count"],d["length"]))
-        self._data_types.append(dataType(major_type,specific_len,major_length))
+            specific_len+=d["count"]
+        print("major")
+        print(major_type)
+        print(specific_len)
+        print(major_length)
+        self._data_types.append(dataType(major_type,self._data_count-specific_len,major_length))
+        print(self._data_types)
 
     def add_data_types(self,data_type:dataType):
         self._data_types.append(data_type)
@@ -74,15 +79,19 @@ class dataGenerator:
     def generateData(self):
 
         data_ret = {}
-        
+        print(self._data_types)
+        print(len(self._data_types))
         for dt in self._data_types :
-            print(dt)
-            if dt._data_type == "int"  :
-                data_ret[dt._data_name]=random.randrange(1,dt._data_length)
+            print(dt._data_type)
+            if dt._data_type == "int" :
+                for i in range(0,dt._data_count) :
+                    data_ret[dt._data_type+str(i)]=random.randrange(1,dt._data_length)
             elif dt._data_type == "string" :
-                data_ret[dt._data_name]=self.unique_strings(dt._data_length,1)
+                for i in range(0,dt._data_count) :
+                    data_ret[dt._data_type+str(i)]=self.unique_strings(dt._data_length,1)
             elif dt._data_type == "long" :
-                data_ret[dt._data_name]=random.randrange((dt._data_length/10000)+1,dt._data_length)
+                for i in range(0,dt._data_count) :
+                    data_ret[dt._data_type+str(i)]=random.randrange((dt._data_length/10000)+1,dt._data_length)
         print(data_ret)
         return data_ret
             
