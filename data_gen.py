@@ -7,6 +7,8 @@ import random
 import string
 import json
 from pathlib import Path
+from stream_server.receiver import Receiver
+from stream_client.sender import Sender
 
 
 class saveable_dir(argparse.Action):
@@ -63,38 +65,46 @@ class dataGenerator:
         For a highly optimized version:
         https://stackoverflow.com/a/48421303/7954504
         """
-        seen = set()
+        seen = list()
 
         # An optimization for tightly-bound loops:
         # Bind these methods outside of a loop
         join = ''.join
-        add = seen.add
+        add = seen.append
 
         while len(seen) < ntokens:
             token = join(random.choices(pool, k=k))
             add(token)
-        return seen
+        return seen[0]
 
+    def data_stringify(self,data):
+        ret=""
+        for i in data:
+            for k,v in i.items():
+                ret+=k+":"+str(v)+" "
+        return ret
 
     def generateData(self):
 
-        data_ret = {}
+        data_ret = []
         print(self._data_types)
         print(len(self._data_types))
         for dt in self._data_types :
             print(dt._data_type)
             if dt._data_type == "int" :
                 for i in range(0,dt._data_count) :
-                    data_ret[dt._data_type+str(i)]=random.randrange(1,dt._data_length)
+                    data_ret.append({dt._data_type+str(i):random.randrange(1,dt._data_length)})
             elif dt._data_type == "string" :
                 for i in range(0,dt._data_count) :
-                    data_ret[dt._data_type+str(i)]=self.unique_strings(dt._data_length,1)
+                    data_ret.append({dt._data_type+str(i):self.unique_strings(dt._data_length,1)})
             elif dt._data_type == "long" :
                 for i in range(0,dt._data_count) :
-                    data_ret[dt._data_type+str(i)]=random.randrange((dt._data_length/10000)+1,dt._data_length)
-        print(data_ret)
-        return data_ret
-            
+                    data_ret.append({dt._data_type+str(i):random.randrange((dt._data_length/10000)+1,dt._data_length)})
+        return self.data_stringify(data_ret)
+
+
+
+
 
 
 
@@ -105,21 +115,24 @@ def main() :
     parser = argparse.ArgumentParser(description='Create Random datastrean written in data.config.json file format')
     parser.add_argument('config_dir', metavar='PARENT_DIR_OF_CONFIG_FILE', type=str, nargs='+',
                     help='Directory path where the config file (data.config.json) exist. (support wildcard *)')
+    parser.add_argument('-t','--target',type=str,help='target server address to send generated data')
+    parser.add_argument('-p','--port',type=int,help='target server address to send generated data')
     #parser.add_argument('-s','--save',action=saveable_dir,help='save data in specified path')
     args = parser.parse_args()
     #save_path =args.save
 
     data_cfg:Path = Path(args.config_dir[0]) / "data.config.json"
     data_sav:Path = Path(args.config_dir[0]) / "data.json"
+
     with open(data_cfg) as f:
         cfg = json.load(f)
+    sender:Sender =Sender(args.target,args.port)
+    sender.connect()
+    while 1:
         generator = dataGenerator(cfg)
-        generator.generateData()
+        data =generator.generateData()
         #{'maximum_data_count': 10, 'major_data_type': 'int', 'specific_data_types': [{'type': 'long', 'count': 1}, {'type': 'string', 'length': 25, 'count': 1}]}
-
-
-
-    sav=open(data_sav,'w')
+        sender.sendData(data)
 
 
 

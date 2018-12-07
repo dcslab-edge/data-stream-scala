@@ -1,0 +1,17 @@
+{
+  "maximum_data_count":10,
+  "major_data_type":"int",
+  "major_data_length":1000,
+  "specific_data_types":[
+    {
+      "type":"long",
+      "count":3,
+      "length":1000000
+    },
+    {
+      "type":"string",
+      "length":25,
+      "count":3
+    }
+  ]
+}
