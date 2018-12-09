@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import json
 
 class dataType:
     def __init__(self,data_type:string,data_count:int,data_length:int=100):
@@ -66,7 +67,8 @@ class dataGenerator:
         return ret
 
     def generateData(self):
-
+        ##Commented parts are case for string-return, Basic is json-return
+        #data_ret ={}
         data_ret = []
         print(self._data_types)
         print(len(self._data_types))
@@ -74,11 +76,16 @@ class dataGenerator:
             print(dt._data_type)
             if dt._data_type == "int" :
                 for i in range(0,dt._data_count) :
+                    #data_ret[dt._data_type+str(i)] = random.randrange(1,dt._data_length)
+                    #json.dumps({dt._data_type+str(i):random.randrange(1,dt._data_length)})
                     data_ret.append({dt._data_type+str(i):random.randrange(1,dt._data_length)})
             elif dt._data_type == "string" :
                 for i in range(0,dt._data_count) :
+                    #data_ret[dt._data_type+str(i)] = self.unique_strings(dt._data_length,1)
                     data_ret.append({dt._data_type+str(i):self.unique_strings(dt._data_length,1)})
             elif dt._data_type == "long" :
                 for i in range(0,dt._data_count) :
+                    #data_ret[dt._data_type+str(i)] =random.randrange((dt._data_length/10000)+1,dt._data_length)
                     data_ret.append({dt._data_type+str(i):random.randrange((dt._data_length/10000)+1,dt._data_length)})
+        #return json.dumps(data_ret)
         return self.data_stringify(data_ret)
