@@ -16,7 +16,10 @@ class Receiver:
             conn, addr = self._socket.accept()
             print ("TCP Receiver  Waiting for connection on "+self._ip+":"+str(self._port))
             while 1:
-                print(conn.recv(65536))
+                rec=conn.recv(65536)
+                if rec.decode()!='':
+                    print(rec)
+            
         except Exception as e:
             print("something's wrong with %s:%d. Exception is %s" % (self._ip, self._port, e))
         finally:

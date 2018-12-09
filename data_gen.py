@@ -6,6 +6,7 @@ import os
 import random
 import string
 import json
+import time
 from pathlib import Path
 from stream_server.receiver import Receiver
 from stream_client.sender import Sender
@@ -117,22 +118,34 @@ def main() :
                     help='Directory path where the config file (data.config.json) exist. (support wildcard *)')
     parser.add_argument('-t','--target',type=str,help='target server address to send generated data')
     parser.add_argument('-p','--port',type=int,help='target server address to send generated data')
-    #parser.add_argument('-s','--save',action=saveable_dir,help='save data in specified path')
+    parser.add_argument('-i','--interval',type=int,help='interval to send data')
+
+    parser.add_argument('-s','--save',action=saveable_dir,help='save data in specified path')
     args = parser.parse_args()
     #save_path =args.save
 
     data_cfg:Path = Path(args.config_dir[0]) / "data.config.json"
     data_sav:Path = Path(args.config_dir[0]) / "data.json"
+    if args.interval==None : 
+        interval = 1
+    else :
+        interval = args.interval
 
     with open(data_cfg) as f:
         cfg = json.load(f)
-    sender:Sender =Sender(args.target,args.port)
-    sender.connect()
-    while 1:
-        generator = dataGenerator(cfg)
-        data =generator.generateData()
-        #{'maximum_data_count': 10, 'major_data_type': 'int', 'specific_data_types': [{'type': 'long', 'count': 1}, {'type': 'string', 'length': 25, 'count': 1}]}
-        sender.sendData(data)
+    with open(data_sav,'w') as sv:
+        sender:Sender =Sender(args.target,args.port)
+        sender.connect()
+        while 1:
+            generator = dataGenerator(cfg)
+            time.sleep(interval)
+            data =generator.generateData()
+            #{'maximum_data_count': 10, 'major_data_type': 'int', 'specific_data_types': [{'type': 'long', 'count': 1}, {'type': 'string', 'length': 25, 'count': 1}]}
+            sv.write(data)
+            sv.write("\n")
+            sender.sendData(data)
+
+
 
 
 
