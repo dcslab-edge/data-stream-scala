@@ -7,17 +7,12 @@ class Receiver:
         self._port:int=target_port
         self._socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
-    def bind(self):
-        self._socket.bind((self._ip,self._port))
-
-    def listen(self,backlog:int):
+    def receive(self,backlog:int):
         try:
-            self._socket.listen(backlog)
-            conn, addr = self._socket.accept()
-            print ("TCP Receiver  Waiting for connection on "+self._ip+":"+str(self._port))
+            self._socket.connect((self._ip,self._port))
             while 1:
-                rec=conn.recv(65536)
-                if rec.decode()!='':
+                rec=conn.recv(65536).decode()
+                if rec!='':
                     print(rec)
             
         except Exception as e:
@@ -30,8 +25,6 @@ def main():
     #parser.add_argument('-s','--save',action=saveable_dir,help='save data in specified path')
 
     rec:Receiver = Receiver("localhost",8888)
-    rec.bind()
-    rec.listen(5)
 
 
 if __name__=="__main__" :
