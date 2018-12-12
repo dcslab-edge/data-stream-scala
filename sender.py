@@ -27,13 +27,13 @@ class Sender:
 
 
 
-    def sendAndSaveData(self):
+    def sendAndSaveData(self,line_limit:int):
         self._socket.bind((self._ip,self._port))
         self._socket.listen(1)
         signal.signal(signal.SIGINT, self.signal_handler)
         with open(self._save,"w") as f:
             try:
-                while 1:
+                for _ in range(0,line_limit):
                     print("1 ok")
                     data =self.genData()
                     print("2 ok")
@@ -51,7 +51,7 @@ class Sender:
                 print(e)
             finally:
                 self._socket.close()
-            f.close()
+                f.close()
 
         # def sendData(self,data):
         #     try:

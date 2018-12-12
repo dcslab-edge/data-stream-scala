@@ -44,7 +44,7 @@ class dataGenerator:
         ntokens: Number of tokens
         pool: Iterable of characters to choose from
 
-        For a highly optimized version:
+ued version:
         https://stackoverflow.com/a/48421303/7954504
         """
         seen = list()
