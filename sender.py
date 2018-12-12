@@ -1,3 +1,7 @@
+
+
+import signal
+import sys
 import socket
 import time
 from data_generator import dataGenerator,dataType
@@ -13,21 +17,29 @@ class Sender:
         self._save = save
         self._interval = interval
 
+
     def genData(self):
         return self._generator.generateData()
 
+    def signal_handler(self,sig, frame):
+        self._socket.close()
+        sys.exit(0)
 
-    def sendAndSaveData(self):
+
+
+    def sendAndSaveData(self,line_limit:int):
         self._socket.bind((self._ip,self._port))
         self._socket.listen(1)
+        signal.signal(signal.SIGINT, self.signal_handler)
         with open(self._save,"w") as f:
             try:
-                while 1:
+                for _ in range(0,line_limit):
                     print("1 ok")
                     data =self.genData()
                     print("2 ok")
                     f.write(data+"\n")
                     print("3 ok")
+                    print(data)
                     conn, addr = self._socket.accept()
                     print("4 ok")
                     conn.send(data.encode())
@@ -39,7 +51,7 @@ class Sender:
                 print(e)
             finally:
                 self._socket.close()
-            f.close()
+                f.close()
 
         # def sendData(self,data):
         #     try:

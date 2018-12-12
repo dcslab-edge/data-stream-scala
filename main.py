@@ -11,6 +11,7 @@ from pathlib import Path
 
 from sender import Sender
 from data_generator import dataGenerator
+from signal_manager import signalManager
 
 class saveable_dir(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -38,6 +39,9 @@ def main() :
 
     data_cfg:Path = Path(args.config_dir[0]) / "data.config.json"
     data_sav:Path = Path(args.config_dir[0]) / "data.json"
+    sig:signalManager = signalManager("147.46.242.201",8192)
+
+    
     if args.interval==None : 
         interval = 1
     else :
@@ -48,7 +52,14 @@ def main() :
     with open(data_sav,'w') as sv:
         generator = dataGenerator(cfg)
         sender:Sender =Sender(generator,interval,data_sav,args.target,args.port)
-        sender.sendAndSaveData()
+        conn,addr = sig.wait_for_connection()
+        try:
+          sig.wait_for_start_signal(conn,sender)
+        except Exception as e:
+          print(e)
+        finally :
+          conn.close()
+          sig._socket.close()
 
 
 
