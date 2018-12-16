@@ -44,7 +44,7 @@ class Sender:
                     print("4 ok")
                     conn.send(data.encode())
                     print("5 ok")
-                    time.sleep(self._interval)
+                    time.sleep(self._interval/1000)
                     conn.close()
             except Exception as e:
                 print("error occurred")
@@ -52,6 +52,7 @@ class Sender:
             finally:
                 self._socket.close()
                 f.close()
+        print("send terminated")
 
         # def sendData(self,data):
         #     try:
